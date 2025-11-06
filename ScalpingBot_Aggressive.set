@@ -1,0 +1,33 @@
+; Scalping Bot Settings - Aggressive (For Higher Risk Tolerance)
+; Save this as: ScalpingBot_Aggressive.set
+; To use: In MT5 Strategy Tester or EA Settings, click "Load" and select this file
+
+RiskPercent=2.0
+MinLotSize=0.01
+MaxLotSize=0.2
+MagicNumber=123456
+
+RSI_Period=14
+RSI_Overbought=75
+RSI_Oversold=25
+Fast_EMA_Period=5
+Slow_EMA_Period=13
+ATR_Period=14
+BB_Period=20
+BB_Deviation=2.0
+
+StopLossMultiplier=1.2
+TakeProfitMultiplier=3.0
+UseTrailingStop=1
+TrailingStopMultiplier=0.8
+MaxDailyLossPercent=8.0
+MaxTradesPerDay=20
+
+UseTimeFilter=1
+StartHour=7
+EndHour=23
+AvoidNews=1
+
+Slippage=15
+MinSpreadPips=0.0
+MaxSpreadPips=4.0
