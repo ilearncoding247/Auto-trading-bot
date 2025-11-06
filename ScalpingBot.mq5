@@ -203,8 +203,9 @@ bool CanTrade()
    }
    
    //--- Check spread
-   double spread = (SymbolInfoDouble(_Symbol, SYMBOL_ASK) - SymbolInfoDouble(_Symbol, SYMBOL_BID)) / _Point;
-   spread = spread / 10; // Convert to pips
+   double spread_points = (SymbolInfoDouble(_Symbol, SYMBOL_ASK) - SymbolInfoDouble(_Symbol, SYMBOL_BID)) / _Point;
+   int digits = (int)SymbolInfoInteger(_Symbol, SYMBOL_DIGITS);
+   double spread = (digits == 3 || digits == 5) ? spread_points / 10.0 : spread_points; // Convert to pips
    
    if(spread < MinSpreadPips || spread > MaxSpreadPips)
    {
@@ -460,11 +461,15 @@ void ApplyTrailingStop(ulong ticket)
    double new_sl = 0.0;
    bool should_modify = false;
    
+   //--- Calculate minimum movement in points
+   int digits = (int)SymbolInfoInteger(_Symbol, SYMBOL_DIGITS);
+   double min_movement = (digits == 3 || digits == 5) ? _Point * 10 : _Point;
+   
    if(PositionGetInteger(POSITION_TYPE) == POSITION_TYPE_BUY)
    {
       new_sl = current_price - trailing_distance;
       
-      if(new_sl > current_sl + _Point * 10 && new_sl > position_price)
+      if(new_sl > current_sl + min_movement && new_sl > position_price)
       {
          should_modify = true;
       }
@@ -473,7 +478,7 @@ void ApplyTrailingStop(ulong ticket)
    {
       new_sl = current_price + trailing_distance;
       
-      if((new_sl < current_sl - _Point * 10 || current_sl == 0) && new_sl < position_price)
+      if((new_sl < current_sl - min_movement || current_sl == 0) && new_sl < position_price)
       {
          should_modify = true;
       }
