@@ -47,6 +47,10 @@ input group "=== Expert Settings ==="
 input int MagicNumber = 123456;              // Magic Number
 input string ExpertComment = "ScalpingBot";  // Expert Comment
 
+//--- Constants
+#define POINTS_PER_PIP 10           // Points per pip for most forex pairs
+#define INDICATOR_BUFFER_SIZE 3     // Number of indicator values to copy
+
 //--- Global Variables
 CTrade trade;
 int fastMA_Handle, slowMA_Handle, rsi_Handle, atr_Handle;
@@ -166,10 +170,10 @@ bool IsNewBar()
 //+------------------------------------------------------------------+
 bool UpdateIndicators()
 {
-   if(CopyBuffer(fastMA_Handle, 0, 0, 3, fastMA) <= 0) return false;
-   if(CopyBuffer(slowMA_Handle, 0, 0, 3, slowMA) <= 0) return false;
-   if(CopyBuffer(rsi_Handle, 0, 0, 3, rsi) <= 0) return false;
-   if(CopyBuffer(atr_Handle, 0, 0, 3, atr) <= 0) return false;
+   if(CopyBuffer(fastMA_Handle, 0, 0, INDICATOR_BUFFER_SIZE, fastMA) <= 0) return false;
+   if(CopyBuffer(slowMA_Handle, 0, 0, INDICATOR_BUFFER_SIZE, slowMA) <= 0) return false;
+   if(CopyBuffer(rsi_Handle, 0, 0, INDICATOR_BUFFER_SIZE, rsi) <= 0) return false;
+   if(CopyBuffer(atr_Handle, 0, 0, INDICATOR_BUFFER_SIZE, atr) <= 0) return false;
    
    return true;
 }
@@ -207,7 +211,7 @@ bool CheckTradingConditions()
    //--- Check spread
    double spread = (SymbolInfoDouble(_Symbol, SYMBOL_ASK) - 
                     SymbolInfoDouble(_Symbol, SYMBOL_BID)) / _Point;
-   if(spread > MaxSpreadPips * 10)
+   if(spread > MaxSpreadPips * POINTS_PER_PIP)
       return false;
    
    //--- Check minimum bars between trades
@@ -280,6 +284,14 @@ bool CheckSellSignal()
 }
 
 //+------------------------------------------------------------------+
+//| Convert pips to points                                            |
+//+------------------------------------------------------------------+
+double PipsToPoints(double pips)
+{
+   return pips * POINTS_PER_PIP * _Point;
+}
+
+//+------------------------------------------------------------------+
 //| Calculate lot size based on risk                                 |
 //+------------------------------------------------------------------+
 double CalculateLotSize()
@@ -292,7 +304,15 @@ double CalculateLotSize()
    
    double tickValue = SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_VALUE);
    double tickSize = SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE);
-   double slPips = StopLossPips * 10; // Convert to points
+   
+   //--- Validate tick size to prevent division by zero
+   if(tickSize <= 0)
+   {
+      Print("Error: Invalid tick size. Using minimum lot.");
+      return MinLotSize;
+   }
+   
+   double slPips = StopLossPips * POINTS_PER_PIP; // Convert to points
    
    double lotSize = riskAmount / (slPips * tickValue / tickSize);
    
@@ -326,8 +346,8 @@ double NormalizeLot(double lot)
 void OpenBuyTrade()
 {
    double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
-   double sl = ask - StopLossPips * _Point * 10;
-   double tp = ask + TakeProfitPips * _Point * 10;
+   double sl = ask - PipsToPoints(StopLossPips);
+   double tp = ask + PipsToPoints(TakeProfitPips);
    double lot = CalculateLotSize();
    
    if(trade.Buy(lot, _Symbol, ask, sl, tp, ExpertComment))
@@ -347,8 +367,8 @@ void OpenBuyTrade()
 void OpenSellTrade()
 {
    double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
-   double sl = bid + StopLossPips * _Point * 10;
-   double tp = bid - TakeProfitPips * _Point * 10;
+   double sl = bid + PipsToPoints(StopLossPips);
+   double tp = bid - PipsToPoints(TakeProfitPips);
    double lot = CalculateLotSize();
    
    if(trade.Sell(lot, _Symbol, bid, sl, tp, ExpertComment))
@@ -387,11 +407,14 @@ void ManageOpenPosition()
       if(posType == POSITION_TYPE_BUY)
       {
          double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
-         double newSL = bid - TrailingStopPips * _Point * 10;
+         double trailDistance = PipsToPoints(TrailingStopPips);
+         double newSL = bid - trailDistance;
          
-         if(bid > posOpenPrice + TrailingStopPips * _Point * 10)
+         // Only trail if price is in profit by at least trailing distance
+         if(bid > posOpenPrice + trailDistance)
          {
-            if(posSL < newSL - TrailingStepPips * _Point * 10 || posSL == 0)
+            // Move SL up if new SL is higher than current by at least step amount
+            if(posSL < newSL - PipsToPoints(TrailingStepPips) || posSL == 0)
             {
                trade.PositionModify(ticket, newSL, posTP);
             }
@@ -400,11 +423,14 @@ void ManageOpenPosition()
       else if(posType == POSITION_TYPE_SELL)
       {
          double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
-         double newSL = ask + TrailingStopPips * _Point * 10;
+         double trailDistance = PipsToPoints(TrailingStopPips);
+         double newSL = ask + trailDistance;
          
-         if(ask < posOpenPrice - TrailingStopPips * _Point * 10)
+         // Only trail if price is in profit by at least trailing distance
+         if(ask < posOpenPrice - trailDistance)
          {
-            if(newSL < posSL - TrailingStepPips * _Point * 10 || posSL == 0)
+            // Move SL down if new SL is lower than current by at least step amount
+            if(newSL < posSL - PipsToPoints(TrailingStepPips) || posSL == 0)
             {
                trade.PositionModify(ticket, newSL, posTP);
             }
