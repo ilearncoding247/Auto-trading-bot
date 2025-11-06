@@ -107,11 +107,12 @@ int OnInit()
    //--- Check profit target settings
    if(UseProfitTarget)
    {
+      double currentBalance = AccountInfoDouble(ACCOUNT_BALANCE);
       Print("Profit Target Enabled: $", ProfitTargetAmount);
-      Print("Current Balance: $", initialBalance);
+      Print("Current Balance: $", currentBalance);
       
       //--- Check if already at or above target
-      if(initialBalance >= ProfitTargetAmount && AutoPauseAtTarget)
+      if(currentBalance >= ProfitTargetAmount && AutoPauseAtTarget)
       {
          tradingPaused = true;
          Print("Trading PAUSED - Balance already at/above target");

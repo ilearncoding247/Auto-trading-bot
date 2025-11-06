@@ -1,6 +1,6 @@
 # Version History & Changelog
 
-## Version 1.1 (2024-11-06)
+## Version 1.10 (2024-11-06)
 
 ### New Feature: Profit Target
 
