@@ -1,0 +1,70 @@
+# MetaTrader compiled files
+*.ex4
+*.ex5
+
+# MetaTrader cache and logs
+*.log
+*.mqproj
+MQL4/
+MQL5/
+
+# Tester files
+tester/
+*.tst
+*.fxt
+*.hst
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+
+# Python files (if adding Python utilities)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+ENV/
+env/
+
+# Optimization results
+optimization_results/
+*.opt
+
+# Backtest reports
+reports/
+*.htm
+*.html
+
+# System files
+Thumbs.db
+desktop.ini
