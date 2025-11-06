@@ -1,0 +1,27 @@
+# MT5 compiled files
+*.ex5
+
+# MT5 log files
+*.log
+
+# Backup files
+*.bak
+*~
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+*.temp
+
+# Test results
+TestResults/
+BacktestResults/

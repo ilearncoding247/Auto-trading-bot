@@ -1,0 +1,33 @@
+; Scalping Bot Settings - Conservative (For Micro Accounts)
+; Save this as: ScalpingBot_Conservative.set
+; To use: In MT5 Strategy Tester or EA Settings, click "Load" and select this file
+
+RiskPercent=1.0
+MinLotSize=0.01
+MaxLotSize=0.05
+MagicNumber=123456
+
+RSI_Period=14
+RSI_Overbought=70
+RSI_Oversold=30
+Fast_EMA_Period=9
+Slow_EMA_Period=21
+ATR_Period=14
+BB_Period=20
+BB_Deviation=2.0
+
+StopLossMultiplier=1.5
+TakeProfitMultiplier=2.5
+UseTrailingStop=1
+TrailingStopMultiplier=1.0
+MaxDailyLossPercent=5.0
+MaxTradesPerDay=10
+
+UseTimeFilter=1
+StartHour=8
+EndHour=22
+AvoidNews=1
+
+Slippage=10
+MinSpreadPips=0.0
+MaxSpreadPips=2.5
