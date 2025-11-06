@@ -5,10 +5,11 @@
 //+------------------------------------------------------------------+
 #property copyright "Copyright 2024, Auto Trading Bot"
 #property link      "https://www.mql5.com"
-#property version   "1.00"
+#property version   "1.10"
 #property description "Professional Scalping Bot with High Win Rate Strategy"
 #property description "Minimum Account: $2"
 #property description "Strategy: Multi-Indicator Trend Following + RSI + Moving Averages"
+#property description "NEW: Profit Target - Auto pause/resume at target balance"
 
 #include <Trade\Trade.mqh>
 
@@ -43,6 +44,12 @@ input double MaxLotSize = 10.0;              // Maximum Lot Size
 input bool UseFixedLot = false;              // Use Fixed Lot Size
 input double FixedLotSize = 0.01;            // Fixed Lot Size
 
+input group "=== Profit Target ==="
+input bool UseProfitTarget = false;         // Use Profit Target
+input double ProfitTargetAmount = 20000.0;  // Target Account Balance ($)
+input bool AutoPauseAtTarget = true;        // Auto Pause When Target Reached
+input bool AutoResumeBelow = true;          // Auto Resume When Below Target
+
 input group "=== Expert Settings ==="
 input int MagicNumber = 123456;              // Magic Number
 input string ExpertComment = "ScalpingBot";  // Expert Comment
@@ -57,6 +64,8 @@ int fastMA_Handle, slowMA_Handle, rsi_Handle, atr_Handle;
 double fastMA[], slowMA[], rsi[], atr[];
 datetime lastBarTime = 0;
 int barsSinceLastTrade = 999;
+bool tradingPaused = false;                  // Trading pause status
+double initialBalance = 0;                   // Initial balance when EA starts
 
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
@@ -92,6 +101,23 @@ int OnInit()
    Print("Minimum account requirement: $2");
    Print("Strategy: Multi-Indicator Scalping");
    
+   //--- Store initial balance
+   initialBalance = AccountInfoDouble(ACCOUNT_BALANCE);
+   
+   //--- Check profit target settings
+   if(UseProfitTarget)
+   {
+      Print("Profit Target Enabled: $", ProfitTargetAmount);
+      Print("Current Balance: $", initialBalance);
+      
+      //--- Check if already at or above target
+      if(initialBalance >= ProfitTargetAmount && AutoPauseAtTarget)
+      {
+         tradingPaused = true;
+         Print("Trading PAUSED - Balance already at/above target");
+      }
+   }
+   
    return(INIT_SUCCEEDED);
 }
 
@@ -121,6 +147,23 @@ void OnTick()
    //--- Update bars since last trade counter
    barsSinceLastTrade++;
    
+   //--- Check profit target status
+   if(UseProfitTarget)
+   {
+      CheckProfitTarget();
+   }
+   
+   //--- If trading is paused, don't check for new trades
+   if(tradingPaused)
+   {
+      //--- Still manage open positions even when paused
+      if(HasOpenPosition())
+      {
+         ManageOpenPosition();
+      }
+      return;
+   }
+   
    //--- Copy indicator data
    if(!UpdateIndicators())
       return;
@@ -148,6 +191,34 @@ void OnTick()
    {
       OpenSellTrade();
       return;
+   }
+}
+
+//+------------------------------------------------------------------+
+//| Check profit target and manage pause/resume                      |
+//+------------------------------------------------------------------+
+void CheckProfitTarget()
+{
+   double currentBalance = AccountInfoDouble(ACCOUNT_BALANCE);
+   
+   //--- If trading is paused, check if we should resume
+   if(tradingPaused && AutoResumeBelow)
+   {
+      if(currentBalance < ProfitTargetAmount)
+      {
+         tradingPaused = false;
+         Print("Trading RESUMED - Balance ($", currentBalance, ") dropped below target ($", ProfitTargetAmount, ")");
+      }
+   }
+   //--- If trading is active, check if we should pause
+   else if(!tradingPaused && AutoPauseAtTarget)
+   {
+      if(currentBalance >= ProfitTargetAmount)
+      {
+         tradingPaused = true;
+         Print("Trading PAUSED - Target reached! Balance: $", currentBalance, " Target: $", ProfitTargetAmount);
+         Print("Bot will automatically resume when balance drops below target");
+      }
    }
 }
 

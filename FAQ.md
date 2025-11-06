@@ -255,6 +255,47 @@ Recommendation: Let the bot manage unless necessary.
 
 Settings will need to be re-entered.
 
+#### Q: How does the profit target feature work?
+**A**: The profit target feature allows you to set a target account balance. Here's how it works:
+
+**Setup:**
+- Set `UseProfitTarget = true`
+- Set `ProfitTargetAmount` to your desired balance (e.g., 20000 for $20,000)
+- Enable `AutoPauseAtTarget = true` to pause when target is reached
+- Enable `AutoResumeBelow = true` to resume if balance drops below target
+
+**Behavior:**
+- Bot checks your balance on each new bar
+- When balance ≥ target → trading pauses automatically
+- When balance < target → trading resumes automatically
+- Open positions are still managed even when paused (trailing stop, SL, TP)
+
+**Example:**
+If you set target at $20,000:
+- Balance reaches $20,050 → Bot pauses, won't open new trades
+- You withdraw $500, balance now $19,550 → Bot resumes trading
+- Balance reaches $20,100 again → Bot pauses again
+
+**Use Cases:**
+- Daily profit goals (current balance + $100)
+- Milestone protection (pause at $10k, $20k, etc.)
+- Drawdown prevention during volatile markets
+- Profit locking after good winning streaks
+
+#### Q: Can I set daily profit targets?
+**A**: Yes! Use the profit target feature:
+```
+UseProfitTarget = true
+ProfitTargetAmount = [Current Balance + Daily Goal]
+```
+
+For example, if your balance is $500 and you want to make $50/day:
+- Set `ProfitTargetAmount = 550`
+- When reached, bot pauses
+- Next day, manually adjust to 600, and so on
+
+Or withdraw profits daily and let `AutoResumeBelow` restart trading.
+
 ---
 
 ### Performance & Optimization

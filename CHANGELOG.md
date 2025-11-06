@@ -1,5 +1,37 @@
 # Version History & Changelog
 
+## Version 1.1 (2024-11-06)
+
+### New Feature: Profit Target
+
+**Profit Target System:**
+- ✅ Set target account balance (e.g., $20,000)
+- ✅ Automatic pause when target is reached
+- ✅ Automatic resume when balance drops below target
+- ✅ Continues managing open positions even when paused
+- ✅ Configurable via input parameters
+
+**New Parameters:**
+- `UseProfitTarget`: Enable/disable profit target feature (default: false)
+- `ProfitTargetAmount`: Target account balance in dollars (default: 20000)
+- `AutoPauseAtTarget`: Automatically pause when target reached (default: true)
+- `AutoResumeBelow`: Automatically resume when below target (default: true)
+
+**Use Cases:**
+- Daily/weekly profit goals
+- Account milestone protection
+- Drawdown management
+- Profit locking during volatile conditions
+
+**Technical Implementation:**
+- Added `CheckProfitTarget()` function called on each new bar
+- Added `tradingPaused` global state variable
+- Enhanced OnInit to check initial balance vs target
+- Trading logic skips signal checking when paused
+- Position management continues even when paused
+
+---
+
 ## Version 1.0 (2024-11-06)
 
 ### Initial Release

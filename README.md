@@ -7,6 +7,7 @@ A high-performance auto-trading Expert Advisor (EA) for MetaTrader 5 designed fo
 - **Multi-Indicator Strategy**: Combines Moving Averages, RSI, and ATR for accurate signals
 - **High Win Rate**: Optimized for quick profits with tight stop losses
 - **Smart Risk Management**: Automatic position sizing based on account balance
+- **Profit Target**: Set a target balance and bot pauses/resumes automatically
 - **Trailing Stop**: Locks in profits as the market moves in your favor
 - **Trade Filters**: Time-based and spread filters to avoid unfavorable conditions
 - **Money Management**: Percentage-based risk or fixed lot size options
@@ -86,6 +87,12 @@ The bot uses a multi-indicator approach:
 - **UseFixedLot**: Use fixed lot instead of risk-based (default: false)
 - **FixedLotSize**: Fixed lot size if enabled (default: 0.01)
 
+### Profit Target
+- **UseProfitTarget**: Enable profit target feature (default: false)
+- **ProfitTargetAmount**: Target account balance in dollars (default: 20000)
+- **AutoPauseAtTarget**: Automatically pause trading when target is reached (default: true)
+- **AutoResumeBelow**: Automatically resume trading when balance drops below target (default: true)
+
 ## 💡 Recommended Settings for Different Account Sizes
 
 ### $2 - $10 Account
@@ -122,6 +129,37 @@ UseFixedLot = false
 5. **Monitor Initially**: Watch the bot for the first few days to ensure it's working as expected
 6. **Adjust Parameters**: Optimize settings based on market conditions and your risk tolerance
 7. **Avoid News Time**: Consider disabling the bot during major news events
+8. **Use Profit Targets**: Set realistic profit targets to protect your gains and manage drawdown
+
+## 💰 Using the Profit Target Feature
+
+The profit target feature allows you to set a target account balance. When reached, the bot automatically pauses trading to protect your profits.
+
+### How It Works:
+1. **Set Your Target**: Enable `UseProfitTarget` and set `ProfitTargetAmount` (e.g., $20,000)
+2. **Auto Pause**: When your balance reaches the target, trading automatically pauses
+3. **Auto Resume**: If balance drops below the target (due to withdrawals or losses on other EAs), trading resumes automatically
+4. **Position Management**: The bot continues to manage any open positions even when paused
+
+### Example Configuration:
+```
+UseProfitTarget = true
+ProfitTargetAmount = 20000    // Target: $20,000
+AutoPauseAtTarget = true      // Pause when target reached
+AutoResumeBelow = true        // Resume if balance drops below target
+```
+
+### Use Cases:
+- **Daily/Weekly Goals**: Set a daily profit target (e.g., current balance + $100)
+- **Account Milestones**: Pause at key milestones to reassess strategy
+- **Profit Protection**: Lock in gains during volatile market conditions
+- **Drawdown Management**: Prevent giving back profits during unfavorable conditions
+
+### Notes:
+- The bot checks the target on each new bar
+- Existing open positions are still managed (trailing stop, SL, TP)
+- The pause/resume status is displayed in the Experts log
+- You can manually disable the bot at any time via MT5 interface
 
 ## 🎓 Understanding the Strategy
 
